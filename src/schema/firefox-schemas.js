@@ -2,15 +2,14 @@ import manifestNamespaces from './firefox-manifest.json';
 import extensionTypesNamespaces from './firefox-extension-types.json';
 
 function loadTypes(schema) {
-  const types = {};
-  schema.types.forEach((type) => {
-    types[type.id] = type;
-  });
-  return types;
+  // Convert the array of types to an object.
+  return schema.types.reduce((obj, type) => ({
+    ...obj,
+    [type.id]: type,
+  }), {});
 }
 
-function expandProperty(namespaces, currentNamespace, schema, name, value) {
-  console.log('expanding', name, Object.keys(value));
+function expandValue(namespaces, currentNamespace, schema, name, value) {
   if (typeof value !== 'object') {
     return value;
   }
@@ -20,66 +19,65 @@ function expandProperty(namespaces, currentNamespace, schema, name, value) {
     if (lookupId.includes('.')) {
       [ namespace, lookupId ] = lookupId.split('.');
     }
-    const lookupNamespace = namespaces[namespace];
+    const lookupNamespace = namespaces[namespace].types;
     const { $ref, ...newValue } = value;
     const { id, ...ref } = lookupNamespace[lookupId];
-    console.log('expanded', name, id, Object.keys(newValue), Object.keys(ref));
-    return expandProperty(namespaces, currentNamespace, schema, name, { ...newValue, ...ref });
+    return expandValue(namespaces, currentNamespace, schema, name, { ...ref, ...newValue });
   }
   const { ...newValue } = value;
+  if ('types' in value) {
+    newValue.types = expandValues(namespaces, currentNamespace, schema, value.types);
+  }
   if ('properties' in value) {
-    newValue.properties = expandProperties(namespaces, currentNamespace, schema, value.properties);
+    newValue.properties = expandValues(namespaces, currentNamespace, schema, value.properties);
   }
   if ('additionalProperties' in value && typeof value.additionalProperties === 'object') {
-    newValue.additionalProperties = expandProperties(
+    newValue.additionalProperties = expandValues(
       namespaces, currentNamespace, schema, value.additionalProperties);
   }
   // if ('choices' in value) {
-  //   newValue.choices = value.choices.map((choice) => expandProperties(
+  //   newValue.choices = value.choices.map((choice) => expandValues(
   //     namespaces, currentNamespace, schema, choice));
   // }
   return newValue;
 }
 
-function expandProperties(namespaces, namespace, schema, properties) {
-  return Object.keys(properties).reduce((obj, property) => ({
-    ...obj,
-    [property]: expandProperty(namespaces, namespace, schema, property, properties[property]),
-  }), {});
+function expandValues(namespaces, namespace, schema, toExpand) {
+  if (typeof(toExpand) === 'object') {
+    return Object.keys(toExpand).reduce((obj, key) => {
+      return ({
+        ...obj,
+        [key]: expandValue(namespaces, namespace, schema, key, toExpand[key]),
+      });
+    }, {});
+  }
+  return toExpand;
 }
 
 function expandNamespaceRefs(namespaces) {
   return Object.keys(namespaces).reduce((obj, namespace) => {
+    const schema = namespaces[namespace];
     return {
-      ...namespaces,
-      [namespace]: expandRefs(namespaces, namespace, namespaces[namespace]),
+      ...obj,
+      [namespace]: {
+        ...schema,
+        types: expandValues(namespaces, namespace, schema, schema.types),
+        properties: expandValues(namespaces, namespace, schema, schema.properties),
+        additionalProperties: expandValues(
+          namespaces, namespace, schema, schema.additionalProperties),
+        // choices: expandValues(namespaces, namespace, schema, schema.types),
+      },
     };
-  }, {});
-}
-
-function expandRefs(namespaces, namespace, schema) {
-  return Object.keys(schema).reduce((obj, type) => {
-    if ('properties' in schema[type]) {
-      return {
-        ...obj,
-        [type]: {
-          ...schema[type],
-          properties: expandProperties(namespaces, namespace, schema, schema[type].properties),
-        },
-      };
-    }
-    return obj;
   }, {});
 }
 
 function loadNamespaces(namespaces, startSchema = {}) {
   const schema = namespaces.reduce((schema, { namespace, ...value }) => {
-    console.log('loadNamespaces', namespaces.length, namespace);
     return ({
       ...schema,
       [namespace]: {
         ...schema[namespace],
-        ...loadTypes({ namespace, ...value }),
+        types: loadTypes({ namespace, ...value }),
       },
     });
   }, startSchema);
@@ -94,4 +92,4 @@ const namespaces = Array.prototype.concat.call(
 
 const schema = loadNamespaces(namespaces);
 import sinon from 'sinon';
-console.log(sinon.format(schema));
+console.log(JSON.stringify(schema));

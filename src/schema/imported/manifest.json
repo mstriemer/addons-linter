@@ -1,6 +1,6 @@
 {
   "id": "manifest",
-  "properties": {
+  "types": {
     "WebExtensionManifest": {
       "type": "object",
       "description": "Represents a WebExtension manifest.json file",
@@ -19,7 +19,7 @@
           "optional": true,
           "properties": {
             "gecko": {
-              "$ref": "#/properties/FirefoxSpecificProperties",
+              "$ref": "#/types/FirefoxSpecificProperties",
               "optional": true
             }
           }
@@ -29,7 +29,7 @@
           "optional": true,
           "properties": {
             "gecko": {
-              "$ref": "#/properties/FirefoxSpecificProperties",
+              "$ref": "#/types/FirefoxSpecificProperties",
               "optional": true
             }
           }
@@ -88,15 +88,15 @@
               "type": "object",
               "properties": {
                 "page": {
-                  "$ref": "#/properties/ExtensionURL"
+                  "$ref": "#/types/ExtensionURL"
                 },
                 "persistent": {
                   "optional": true,
-                  "$ref": "#/properties/PersistentBackgroundProperty"
+                  "$ref": "#/types/PersistentBackgroundProperty"
                 }
               },
               "additionalProperties": {
-                "$ref": "#/properties/UnrecognizedProperty"
+                "$ref": "#/types/UnrecognizedProperty"
               }
             },
             {
@@ -105,16 +105,16 @@
                 "scripts": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/properties/ExtensionURL"
+                    "$ref": "#/types/ExtensionURL"
                   }
                 },
                 "persistent": {
                   "optional": true,
-                  "$ref": "#/properties/PersistentBackgroundProperty"
+                  "$ref": "#/types/PersistentBackgroundProperty"
                 }
               },
               "additionalProperties": {
-                "$ref": "#/properties/UnrecognizedProperty"
+                "$ref": "#/types/UnrecognizedProperty"
               }
             }
           ],
@@ -125,7 +125,7 @@
           "optional": true,
           "properties": {
             "page": {
-              "$ref": "#/properties/ExtensionURL"
+              "$ref": "#/types/ExtensionURL"
             },
             "browser_style": {
               "type": "boolean",
@@ -156,7 +156,7 @@
           "type": "array",
           "optional": true,
           "items": {
-            "$ref": "#/properties/ContentScript"
+            "$ref": "#/types/ContentScript"
           }
         },
         "content_security_policy": {
@@ -170,7 +170,7 @@
           "items": {
             "choices": [
               {
-                "$ref": "#/properties/Permission"
+                "$ref": "#/types/Permission"
               },
               {
                 "type": "string",
@@ -205,7 +205,7 @@
         }
       },
       "additionalProperties": {
-        "$ref": "#/properties/UnrecognizedProperty"
+        "$ref": "#/types/UnrecognizedProperty"
       }
     },
     "Permission": {
@@ -221,7 +221,7 @@
           ]
         },
         {
-          "$ref": "#/properties/MatchPattern"
+          "$ref": "#/types/MatchPattern"
         }
       ]
     },
@@ -245,7 +245,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/properties/ExtensionID",
+          "$ref": "#/types/ExtensionID",
           "optional": true
         },
         "update_url": {
@@ -285,7 +285,7 @@
       "type": "object",
       "description": "Details of the script or CSS to inject. Either the code or the file property must be set, but both may not be set at the same time. Based on InjectDetails, but using underscore rather than camel case naming conventions.",
       "additionalProperties": {
-        "$ref": "#/properties/UnrecognizedProperty"
+        "$ref": "#/types/UnrecognizedProperty"
       },
       "properties": {
         "matches": {
@@ -293,7 +293,7 @@
           "optional": false,
           "minItems": 1,
           "items": {
-            "$ref": "#/properties/MatchPattern"
+            "$ref": "#/types/MatchPattern"
           }
         },
         "exclude_matches": {
@@ -301,7 +301,7 @@
           "optional": true,
           "minItems": 1,
           "items": {
-            "$ref": "#/properties/MatchPattern"
+            "$ref": "#/types/MatchPattern"
           }
         },
         "include_globs": {
@@ -323,7 +323,7 @@
           "optional": true,
           "description": "The list of CSS files to inject",
           "items": {
-            "$ref": "#/properties/ExtensionURL"
+            "$ref": "#/types/ExtensionURL"
           }
         },
         "js": {
@@ -331,7 +331,7 @@
           "optional": true,
           "description": "The list of CSS files to inject",
           "items": {
-            "$ref": "#/properties/ExtensionURL"
+            "$ref": "#/types/ExtensionURL"
           }
         },
         "all_frames": {
@@ -345,7 +345,7 @@
           "description": "If matchAboutBlank is true, then the code is also injected in about:blank and about:srcdoc frames if your extension has access to its parent document. Code cannot be inserted in top-level about:-frames. By default it is <code>false</code>."
         },
         "run_at": {
-          "$ref": "extensionTypes#/properties/RunAt",
+          "$ref": "extensionTypes#/types/RunAt",
           "optional": true,
           "description": "The soonest that the JavaScript or CSS will be injected into the tab. Defaults to \"document_idle\"."
         }
@@ -357,13 +357,13 @@
           "type": "object",
           "patternProperties": {
             "^[1-9]\\d*$": {
-              "$ref": "#/properties/ExtensionURL"
+              "$ref": "#/types/ExtensionURL"
             }
           },
           "additionalProperties": false
         },
         {
-          "$ref": "#/properties/ExtensionURL"
+          "$ref": "#/types/ExtensionURL"
         }
       ]
     },
@@ -373,13 +373,13 @@
           "type": "object",
           "patternProperties": {
             "^[1-9]\\d*$": {
-              "$ref": "#/properties/ImageData"
+              "$ref": "#/types/ImageData"
             }
           },
           "additionalProperties": false
         },
         {
-          "$ref": "#/properties/ImageData"
+          "$ref": "#/types/ImageData"
         }
       ]
     },
@@ -403,5 +403,6 @@
       "type": "boolean",
       "deprecated": "Event pages are not currently supported. This will run as a persistent background page."
     }
-  }
+  },
+  "$ref": "#/types/WebExtensionManifest"
 }

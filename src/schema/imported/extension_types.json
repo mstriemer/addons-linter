@@ -1,7 +1,7 @@
 {
   "id": "extensionTypes",
   "description": "The <code>browser.extensionTypes</code> API contains type declarations for WebExtensions.",
-  "properties": {
+  "types": {
     "ImageFormat": {
       "type": "string",
       "enum": [
@@ -15,7 +15,7 @@
       "description": "Details about the format and quality of an image.",
       "properties": {
         "format": {
-          "$ref": "#/properties/ImageFormat",
+          "$ref": "#/types/ImageFormat",
           "optional": true,
           "description": "The format of the resulting image.  Default is <code>\"jpeg\"</code>."
         },
@@ -76,12 +76,12 @@
           "description": "The ID of the frame to inject the script into. This may not be used in combination with <code>allFrames</code>."
         },
         "runAt": {
-          "$ref": "#/properties/RunAt",
+          "$ref": "#/types/RunAt",
           "optional": true,
           "description": "The soonest that the JavaScript or CSS will be injected into the tab. Defaults to \"document_idle\"."
         },
         "cssOrigin": {
-          "$ref": "#/properties/CSSOrigin",
+          "$ref": "#/types/CSSOrigin",
           "optional": true,
           "description": "The css origin of the stylesheet to inject. Defaults to \"author\"."
         }

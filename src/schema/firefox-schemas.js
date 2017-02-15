@@ -1,5 +1,4 @@
-import manifestSchema from './firefox-manifest.json';
-import extensionTypesSchema from './firefox-extension-types.json';
+import fs from 'fs';
 
 const VALID_TYPES = [
   'array',
@@ -102,17 +101,12 @@ function loadNamespaces(namespaces, startSchema = {}) {
 }
 
 function normalizeSchema(schema) {
-  const { types, ...rest } = schema[0];
+  const { namespace, types, ...rest } = schema[0];
   return {
     ...rest,
+    id: namespace,
     properties: loadTypes(types),
   };
-}
-
-function rewriteFile(name) {
-  return {
-    extensionTypes: 'extensionTypes.json',
-  }[name] || name;
 }
 
 function rewriteRef(key, value) {
@@ -122,11 +116,11 @@ function rewriteRef(key, value) {
     return rewriteRefs(value);
   } else if (key === '$ref') {
     let path = value;
-    let file = '';
+    let schemaId = '';
     if (value.includes('.')) {
-      [file, path] = value.split('.', 2);
+      [schemaId, path] = value.split('.', 2);
     }
-    return `${file}#/properties/${path}`;
+    return `${schemaId}#/properties/${path}`;
   } else if (key === 'type' && value === 'any') {
     return VALID_TYPES;
   } else if (key === 'id') {
@@ -145,26 +139,32 @@ function rewriteRefs(schema) {
   }, {});
 }
 
-function loadSchema(schema, id) {
+function loadSchema(schema) {
+  const { id, ...rest } = normalizeSchema(schema);
   return {
-    ...rewriteRefs(normalizeSchema(schema, id)),
     id,
+    ...rewriteRefs(rest),
   };
 }
 
-function getSchemaId() {
-  // eg ['node', 'firefox-schemas.js', 'manifest']
-  return process.argv[2];
+function readSchema(path, file) {
+  return JSON.parse(fs.readFileSync(`${path}/${file}`));
 }
 
-function pickSchema(id) {
-  return {
-    manifest: manifestSchema,
-    extensionTypes: extensionTypesSchema,
-  }[id];
+function writeSchema(path, file, schema) {
+  fs.writeFile(`${path}/${file}`, JSON.stringify(schema, undefined, 2));
 }
 
-const schemaId = getSchemaId();
-const schema = loadSchema(pickSchema(schemaId), schemaId);
-// eslint-disable-next-line no-console
-console.log(JSON.stringify(schema));
+function schemaFiles(path) {
+  return fs.readdirSync(path);
+}
+
+function importSchemas() {
+  const path = process.argv[2];
+  schemaFiles(path).forEach((file) => {
+    const schema = loadSchema(readSchema(path, file));
+    writeSchema(`${path}/../imported`, file, schema);
+  });
+}
+
+importSchemas();

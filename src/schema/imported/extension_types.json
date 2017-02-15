@@ -1,5 +1,5 @@
 {
-  "namespace": "extensionTypes",
+  "id": "extensionTypes",
   "description": "The <code>browser.extensionTypes</code> API contains type declarations for WebExtensions.",
   "properties": {
     "ImageFormat": {
@@ -113,6 +113,5 @@
         }
       ]
     }
-  },
-  "id": "extensionTypes"
+  }
 }

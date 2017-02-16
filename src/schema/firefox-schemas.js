@@ -1,5 +1,8 @@
 import fs from 'fs';
 
+// TODO: Handle /* \n...\n*/ style comments in schemas.
+// TODO: Rewrite `optional`: false to `required`: [<fields>].
+
 const VALID_TYPES = [
   'array',
   'boolean',

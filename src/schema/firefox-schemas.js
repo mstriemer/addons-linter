@@ -8,6 +8,11 @@ const VALID_TYPES = [
   'object',
   'string',
 ];
+const VALID_SCHEMAS = [
+  'downloads.json',
+  'manifest.json',
+  'extension_types.json',
+];
 
 function loadTypes(types) {
   // Convert the array of types to an object.
@@ -18,7 +23,8 @@ function loadTypes(types) {
 }
 
 function normalizeSchema(schema) {
-  const { namespace, types, ...rest } = schema[0];
+  const activeSchema = schema.length === 1 ? schema[0] : schema[1];
+  const { namespace, types, ...rest } = activeSchema;
   return {
     ...rest,
     id: namespace,
@@ -66,7 +72,16 @@ function loadSchema(schema) {
 }
 
 function readSchema(path, file) {
-  return JSON.parse(fs.readFileSync(`${path}/${file}`));
+  const lines = fs.readFileSync(`${path}/${file}`, 'utf-8').split('\n');
+  const jsonContents = lines.reduce((arr, line) => {
+    const trimmed = line.trim();
+    if (trimmed.length === 0 || trimmed.startsWith('//')) {
+      return arr;
+    }
+    arr.push(line);
+    return arr;
+  }, []).join('\n');
+  return JSON.parse(jsonContents);
 }
 
 function writeSchema(path, file, schema) {
@@ -74,7 +89,7 @@ function writeSchema(path, file, schema) {
 }
 
 function schemaFiles(path) {
-  return fs.readdirSync(path);
+  return fs.readdirSync(path).filter((file) => VALID_SCHEMAS.includes(file));
 }
 
 function importSchemas() {

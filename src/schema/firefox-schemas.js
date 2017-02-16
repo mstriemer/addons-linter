@@ -10,6 +10,7 @@ const VALID_TYPES = [
 ];
 const VALID_SCHEMAS = [
   'downloads.json',
+  'i18n.json',
   'manifest.json',
   'extension_types.json',
 ];
@@ -22,9 +23,39 @@ function loadTypes(types) {
   }), {});
 }
 
-function normalizeSchema(schema) {
-  const activeSchema = schema.length === 1 ? schema[0] : schema[1];
-  const { namespace, types, ...rest } = activeSchema;
+function rewriteTypeExtensions(typeExtensions) {
+  return typeExtensions.reduce((schema, type) => {
+    const { $extend, ...rest } = type;
+    return {
+      ...schema,
+      [$extend]: rest,
+    };
+  }, {});
+}
+
+function rewriteExtend(schemas) {
+  return schemas.reduce((schema, extendSchema) => {
+    return {
+      ...schema,
+      ...rewriteTypeExtensions(extendSchema.types),
+    };
+  }, {});
+}
+
+function normalizeSchema(schemas) {
+  let primarySchema;
+
+  if (schemas.length === 1) {
+    primarySchema = schemas[0];
+  } else {
+    const extendSchemas = schemas.slice(0, schemas.length - 1);
+    primarySchema = rewriteExtend(extendSchemas);
+    primarySchema = {
+      ...schemas[schemas.length - 1],
+      definitions: rewriteExtend(extendSchemas),
+    };
+  }
+  const { namespace, types, ...rest } = primarySchema;
   return {
     ...rest,
     id: namespace,

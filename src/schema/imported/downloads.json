@@ -440,6 +440,20 @@
       "type": "function"
     }
   ],
+  "definitions": {
+    "Permission": {
+      "choices": [
+        {
+          "type": "string",
+          "enum": [
+            "downloads",
+            "downloads.open",
+            "downloads.shelf"
+          ]
+        }
+      ]
+    }
+  },
   "types": {
     "FilenameConflictAction": {
       "type": "string",

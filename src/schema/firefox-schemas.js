@@ -14,6 +14,7 @@ const VALID_SCHEMAS = [
   'manifest.json',
   'extension_types.json',
 ];
+const FLAG_PATTERN_REGEX = /^\(\?[im]*\)(.*)/;
 
 function loadTypes(types) {
   // Convert the array of types to an object.
@@ -23,44 +24,52 @@ function loadTypes(types) {
   }), {});
 }
 
-function rewriteTypeExtensions(typeExtensions) {
-  return typeExtensions.reduce((schema, type) => {
-    const { $extend, ...rest } = type;
-    return {
-      ...schema,
-      [$extend]: rest,
-    };
-  }, {});
-}
-
-function rewriteExtend(schemas) {
-  return schemas.reduce((schema, extendSchema) => {
-    return {
-      ...schema,
-      ...rewriteTypeExtensions(extendSchema.types),
-    };
-  }, {});
+function rewriteExtend(schemas, schemaId) {
+  const definitions = {};
+  const refs = {};
+  schemas.forEach((extendSchema) => {
+    const extendId = extendSchema.namespace;
+    extendSchema.types.forEach((type) => {
+      const { $extend, ...rest } = type;
+      // Move the $extend into definitions.
+      definitions[$extend] = rest;
+      // Remember the location of this file so we can $ref it later.
+      refs[`${schemaId}#/definitions/${$extend}`] = {
+        namespace: extendId,
+        type: $extend,
+      };
+    });
+  });
+  return { definitions, refs };
 }
 
 function normalizeSchema(schemas) {
+  let extendSchemas;
   let primarySchema;
 
   if (schemas.length === 1) {
     primarySchema = schemas[0];
+    extendSchemas = [];
   } else {
-    const extendSchemas = schemas.slice(0, schemas.length - 1);
-    primarySchema = rewriteExtend(extendSchemas);
-    primarySchema = {
-      ...schemas[schemas.length - 1],
-      definitions: rewriteExtend(extendSchemas),
-    };
+    extendSchemas = schemas.slice(0, schemas.length - 1);
+    primarySchema = schemas[schemas.length - 1];
   }
   const { namespace, types, ...rest } = primarySchema;
   return {
     ...rest,
+    ...rewriteExtend(extendSchemas, namespace),
     id: namespace,
     types: loadTypes(types),
   };
+}
+
+function stripFlagsFromPattern(value) {
+  // TODO: Fix these patterns and remove this code.
+  const matches = FLAG_PATTERN_REGEX.exec(value);
+  if (matches) {
+    return matches[1];
+  }
+  return value;
 }
 
 function rewriteRef(key, value) {
@@ -79,8 +88,17 @@ function rewriteRef(key, value) {
     return VALID_TYPES;
   } else if (key === 'id') {
     return undefined;
+  } else if (key === 'pattern') {
+    return stripFlagsFromPattern(value);
   }
   return value;
+}
+
+function rewriteKey(key) {
+  if (key === 'choices') {
+    return 'anyOf';
+  }
+  return key;
 }
 
 function rewriteRefs(schema) {
@@ -89,7 +107,7 @@ function rewriteRefs(schema) {
     if (value === undefined) {
       return obj;
     }
-    return { ...obj, [key]: value };
+    return { ...obj, [rewriteKey(key)]: value };
   }, {});
 }
 
@@ -125,8 +143,35 @@ function schemaFiles(path) {
 
 function importSchemas() {
   const path = process.argv[2];
+  const loadedSchemas = {};
+  // Read the schemas into loadedSchemas.
   schemaFiles(path).forEach((file) => {
     const schema = loadSchema(readSchema(path, file));
+    loadedSchemas[schema.id] = {
+      file,
+      schema,
+    };
+  });
+  // Map $extend to $ref.
+  Object.keys(loadedSchemas).forEach((id) => {
+    const { schema } = loadedSchemas[id];
+    Object.keys(schema.refs).forEach((ref) => {
+      const { namespace, type } = schema.refs[ref];
+      const extendSchema = loadedSchemas[namespace].schema;
+      const extendType = extendSchema.types[type];
+      if ('anyOf' in extendType) {
+        extendType.anyOf.push({ $ref: ref });
+      } else {
+        if (!('allOf' in extendType)) {
+          extendSchema.types[type] = { allOf: [extendType] };
+        }
+        extendSchema.types[type].allOf.push({ $ref: ref });
+      }
+    });
+  });
+  // Write out the schemas.
+  Object.keys(loadedSchemas).forEach((id) => {
+    const { file, schema } = loadedSchemas[id];
     writeSchema(`${path}/../imported`, file, schema);
   });
 }

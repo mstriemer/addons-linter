@@ -1,215 +1,224 @@
 {
   "id": "manifest",
+  "definitions": {},
+  "refs": {},
   "types": {
     "WebExtensionManifest": {
-      "type": "object",
-      "description": "Represents a WebExtension manifest.json file",
-      "properties": {
-        "manifest_version": {
-          "type": "integer",
-          "minimum": 2,
-          "maximum": 2
-        },
-        "minimum_chrome_version": {
-          "type": "string",
-          "optional": true
-        },
-        "applications": {
+      "allOf": [
+        {
           "type": "object",
-          "optional": true,
+          "description": "Represents a WebExtension manifest.json file",
           "properties": {
-            "gecko": {
-              "$ref": "#/types/FirefoxSpecificProperties",
+            "manifest_version": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 2
+            },
+            "minimum_chrome_version": {
+              "type": "string",
               "optional": true
-            }
-          }
-        },
-        "browser_specific_settings": {
-          "type": "object",
-          "optional": true,
-          "properties": {
-            "gecko": {
-              "$ref": "#/types/FirefoxSpecificProperties",
-              "optional": true
-            }
-          }
-        },
-        "name": {
-          "type": "string",
-          "optional": false,
-          "preprocess": "localize"
-        },
-        "short_name": {
-          "type": "string",
-          "optional": true,
-          "preprocess": "localize"
-        },
-        "description": {
-          "type": "string",
-          "optional": true,
-          "preprocess": "localize"
-        },
-        "author": {
-          "type": "string",
-          "optional": true,
-          "preprocess": "localize",
-          "onError": "warn"
-        },
-        "version": {
-          "type": "string",
-          "optional": false
-        },
-        "homepage_url": {
-          "type": "string",
-          "format": "url",
-          "optional": true,
-          "preprocess": "localize"
-        },
-        "icons": {
-          "type": "object",
-          "optional": true,
-          "patternProperties": {
-            "^[1-9]\\d*$": {
-              "type": "string"
-            }
-          }
-        },
-        "incognito": {
-          "type": "string",
-          "enum": [
-            "spanning"
-          ],
-          "optional": true,
-          "onError": "warn"
-        },
-        "background": {
-          "choices": [
-            {
+            },
+            "applications": {
               "type": "object",
+              "optional": true,
+              "properties": {
+                "gecko": {
+                  "$ref": "#/types/FirefoxSpecificProperties",
+                  "optional": true
+                }
+              }
+            },
+            "browser_specific_settings": {
+              "type": "object",
+              "optional": true,
+              "properties": {
+                "gecko": {
+                  "$ref": "#/types/FirefoxSpecificProperties",
+                  "optional": true
+                }
+              }
+            },
+            "name": {
+              "type": "string",
+              "optional": false,
+              "preprocess": "localize"
+            },
+            "short_name": {
+              "type": "string",
+              "optional": true,
+              "preprocess": "localize"
+            },
+            "description": {
+              "type": "string",
+              "optional": true,
+              "preprocess": "localize"
+            },
+            "author": {
+              "type": "string",
+              "optional": true,
+              "preprocess": "localize",
+              "onError": "warn"
+            },
+            "version": {
+              "type": "string",
+              "optional": false
+            },
+            "homepage_url": {
+              "type": "string",
+              "format": "url",
+              "optional": true,
+              "preprocess": "localize"
+            },
+            "icons": {
+              "type": "object",
+              "optional": true,
+              "patternProperties": {
+                "^[1-9]\\d*$": {
+                  "type": "string"
+                }
+              }
+            },
+            "incognito": {
+              "type": "string",
+              "enum": [
+                "spanning"
+              ],
+              "optional": true,
+              "onError": "warn"
+            },
+            "background": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "$ref": "#/types/ExtensionURL"
+                    },
+                    "persistent": {
+                      "optional": true,
+                      "$ref": "#/types/PersistentBackgroundProperty"
+                    }
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/types/UnrecognizedProperty"
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "scripts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/types/ExtensionURL"
+                      }
+                    },
+                    "persistent": {
+                      "optional": true,
+                      "$ref": "#/types/PersistentBackgroundProperty"
+                    }
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/types/UnrecognizedProperty"
+                  }
+                }
+              ],
+              "optional": true
+            },
+            "options_ui": {
+              "type": "object",
+              "optional": true,
               "properties": {
                 "page": {
                   "$ref": "#/types/ExtensionURL"
                 },
-                "persistent": {
-                  "optional": true,
-                  "$ref": "#/types/PersistentBackgroundProperty"
-                }
-              },
-              "additionalProperties": {
-                "$ref": "#/types/UnrecognizedProperty"
-              }
-            },
-            {
-              "type": "object",
-              "properties": {
-                "scripts": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/types/ExtensionURL"
-                  }
+                "browser_style": {
+                  "type": "boolean",
+                  "optional": true
                 },
-                "persistent": {
-                  "optional": true,
-                  "$ref": "#/types/PersistentBackgroundProperty"
+                "chrome_style": {
+                  "type": "boolean",
+                  "optional": true
+                },
+                "open_in_tab": {
+                  "type": "boolean",
+                  "optional": true
                 }
               },
               "additionalProperties": {
-                "$ref": "#/types/UnrecognizedProperty"
+                "type": [
+                  "array",
+                  "boolean",
+                  "null",
+                  "number",
+                  "object",
+                  "string"
+                ],
+                "deprecated": "An unexpected property was found in the WebExtension manifest"
               }
-            }
-          ],
-          "optional": true
-        },
-        "options_ui": {
-          "type": "object",
-          "optional": true,
-          "properties": {
-            "page": {
-              "$ref": "#/types/ExtensionURL"
             },
-            "browser_style": {
-              "type": "boolean",
+            "content_scripts": {
+              "type": "array",
+              "optional": true,
+              "items": {
+                "$ref": "#/types/ContentScript"
+              }
+            },
+            "content_security_policy": {
+              "type": "string",
+              "optional": true,
+              "format": "contentSecurityPolicy",
+              "onError": "warn"
+            },
+            "permissions": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/types/Permission"
+                  },
+                  {
+                    "type": "string",
+                    "deprecated": "Unknown permission ${value}"
+                  }
+                ]
+              },
               "optional": true
             },
-            "chrome_style": {
-              "type": "boolean",
+            "web_accessible_resources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "optional": true
             },
-            "open_in_tab": {
-              "type": "boolean",
-              "optional": true
+            "developer": {
+              "type": "object",
+              "optional": true,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "optional": true,
+                  "preprocess": "localize"
+                },
+                "url": {
+                  "type": "string",
+                  "optional": true,
+                  "preprocess": "localize"
+                }
+              }
             }
           },
           "additionalProperties": {
-            "type": [
-              "array",
-              "boolean",
-              "null",
-              "number",
-              "object",
-              "string"
-            ],
-            "deprecated": "An unexpected property was found in the WebExtension manifest"
+            "$ref": "#/types/UnrecognizedProperty"
           }
         },
-        "content_scripts": {
-          "type": "array",
-          "optional": true,
-          "items": {
-            "$ref": "#/types/ContentScript"
-          }
-        },
-        "content_security_policy": {
-          "type": "string",
-          "optional": true,
-          "format": "contentSecurityPolicy",
-          "onError": "warn"
-        },
-        "permissions": {
-          "type": "array",
-          "items": {
-            "choices": [
-              {
-                "$ref": "#/types/Permission"
-              },
-              {
-                "type": "string",
-                "deprecated": "Unknown permission ${value}"
-              }
-            ]
-          },
-          "optional": true
-        },
-        "web_accessible_resources": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "optional": true
-        },
-        "developer": {
-          "type": "object",
-          "optional": true,
-          "properties": {
-            "name": {
-              "type": "string",
-              "optional": true,
-              "preprocess": "localize"
-            },
-            "url": {
-              "type": "string",
-              "optional": true,
-              "preprocess": "localize"
-            }
-          }
+        {
+          "$ref": "i18n#/definitions/WebExtensionManifest"
         }
-      },
-      "additionalProperties": {
-        "$ref": "#/types/UnrecognizedProperty"
-      }
+      ]
     },
     "Permission": {
-      "choices": [
+      "anyOf": [
         {
           "type": "string",
           "enum": [
@@ -222,6 +231,9 @@
         },
         {
           "$ref": "#/types/MatchPattern"
+        },
+        {
+          "$ref": "downloads#/definitions/Permission"
         }
       ]
     },
@@ -230,14 +242,14 @@
       "format": "strictRelativeUrl"
     },
     "ExtensionID": {
-      "choices": [
+      "anyOf": [
         {
           "type": "string",
-          "pattern": "(?i)^\\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\}$"
+          "pattern": "^\\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\}$"
         },
         {
           "type": "string",
-          "pattern": "(?i)^[a-z0-9-._]*@[a-z0-9-._]+$"
+          "pattern": "^[a-z0-9-._]*@[a-z0-9-._]+$"
         }
       ]
     },
@@ -264,7 +276,7 @@
       }
     },
     "MatchPattern": {
-      "choices": [
+      "anyOf": [
         {
           "type": "string",
           "enum": [
@@ -352,7 +364,7 @@
       }
     },
     "IconPath": {
-      "choices": [
+      "anyOf": [
         {
           "type": "object",
           "patternProperties": {
@@ -368,7 +380,7 @@
       ]
     },
     "IconImageData": {
-      "choices": [
+      "anyOf": [
         {
           "type": "object",
           "patternProperties": {

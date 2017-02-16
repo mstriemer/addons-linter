@@ -130,6 +130,12 @@
       }
     }
   },
+  "refs": {
+    "i18n#/definitions/WebExtensionManifest": {
+      "namespace": "manifest",
+      "type": "WebExtensionManifest"
+    }
+  },
   "types": {
     "LanguageCode": {
       "type": "string",

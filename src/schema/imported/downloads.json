@@ -442,7 +442,7 @@
   ],
   "definitions": {
     "Permission": {
-      "choices": [
+      "anyOf": [
         {
           "type": "string",
           "enum": [
@@ -452,6 +452,12 @@
           ]
         }
       ]
+    }
+  },
+  "refs": {
+    "downloads#/definitions/Permission": {
+      "namespace": "manifest",
+      "type": "Permission"
     }
   },
   "types": {
@@ -640,7 +646,7 @@
     },
     "DownloadTime": {
       "description": "A time specified as a Date object, a number or string representing milliseconds since the epoch, or an ISO 8601 string",
-      "choices": [
+      "anyOf": [
         {
           "type": "string",
           "pattern": "^[1-9]\\d*$"

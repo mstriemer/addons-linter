@@ -144,8 +144,7 @@ function schemaFiles(path) {
   return fs.readdirSync(path).filter((file) => VALID_SCHEMAS.includes(file));
 }
 
-function importSchemas() {
-  const path = process.argv[2];
+function loadSchemasFromFile(path) {
   const loadedSchemas = {};
   // Read the schemas into loadedSchemas.
   schemaFiles(path).forEach((file) => {
@@ -155,6 +154,20 @@ function importSchemas() {
       schema,
     };
   });
+  return loadedSchemas;
+}
+
+function writeSchemasToFile(path, loadedSchemas) {
+  // Write out the schemas.
+  Object.keys(loadedSchemas).forEach((id) => {
+    const { file, schema } = loadedSchemas[id];
+    writeSchema(`${path}/../imported`, file, schema);
+  });
+}
+
+function importSchemas() {
+  const path = process.argv[2];
+  const loadedSchemas = loadSchemasFromFile(path);
   // Map $extend to $ref.
   Object.keys(loadedSchemas).forEach((id) => {
     const { schema } = loadedSchemas[id];
@@ -172,11 +185,7 @@ function importSchemas() {
       }
     });
   });
-  // Write out the schemas.
-  Object.keys(loadedSchemas).forEach((id) => {
-    const { file, schema } = loadedSchemas[id];
-    writeSchema(`${path}/../imported`, file, schema);
-  });
+  writeSchemasToFile(path, loadedSchemas);
 }
 
 importSchemas();

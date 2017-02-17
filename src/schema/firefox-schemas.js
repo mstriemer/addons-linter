@@ -1,6 +1,8 @@
 import fs from 'fs';
 
-// TODO: Handle /* \n...\n*/ style comments in schemas.
+import commentJson from 'comment-json';
+
+// TODO: Handle native_host_manifest.json since its namespace is "manifest".
 
 // const VALID_TYPES = [
 //   'array',
@@ -10,12 +12,12 @@ import fs from 'fs';
 //   'object',
 //   'string',
 // ];
-const VALID_SCHEMAS = [
-  'downloads.json',
-  'i18n.json',
-  'manifest.json',
-  'extension_types.json',
-];
+// const VALID_SCHEMAS = [
+//   'downloads.json',
+//   'i18n.json',
+//   'manifest.json',
+//   'extension_types.json',
+// ];
 const FLAG_PATTERN_REGEX = /^\(\?[im]*\)(.*)/;
 
 function loadTypes(types) {
@@ -153,16 +155,11 @@ function loadSchema(schema) {
 }
 
 function readSchema(path, file) {
-  const lines = fs.readFileSync(`${path}/${file}`, 'utf-8').split('\n');
-  const jsonContents = lines.reduce((arr, line) => {
-    const trimmed = line.trim();
-    if (trimmed.length === 0 || trimmed.startsWith('//')) {
-      return arr;
-    }
-    arr.push(line);
-    return arr;
-  }, []).join('\n');
-  return JSON.parse(jsonContents);
+  return commentJson.parse(
+    fs.readFileSync(`${path}/${file}`, 'utf-8'),
+    null, // reviver
+    true, // remove_comments
+  );
 }
 
 function writeSchema(path, file, schema) {
@@ -170,7 +167,7 @@ function writeSchema(path, file, schema) {
 }
 
 function schemaFiles(path) {
-  return fs.readdirSync(path).filter((file) => VALID_SCHEMAS.includes(file));
+  return fs.readdirSync(path);
 }
 
 function loadSchemasFromFile(path) {

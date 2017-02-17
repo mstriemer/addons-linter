@@ -212,7 +212,31 @@
           "$ref": "#/types/MatchPattern"
         },
         {
+          "$ref": "contextualIdentities#/definitions/Permission"
+        },
+        {
+          "$ref": "cookies#/definitions/Permission"
+        },
+        {
           "$ref": "downloads#/definitions/Permission"
+        },
+        {
+          "$ref": "identity#/definitions/Permission"
+        },
+        {
+          "$ref": "management#/definitions/Permission"
+        },
+        {
+          "$ref": "runtime#/definitions/Permission"
+        },
+        {
+          "$ref": "topSites#/definitions/Permission"
+        },
+        {
+          "$ref": "webNavigation#/definitions/Permission"
+        },
+        {
+          "$ref": "webRequest#/definitions/Permission"
         }
       ]
     },

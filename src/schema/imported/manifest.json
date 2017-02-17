@@ -15,63 +15,51 @@
               "maximum": 2
             },
             "minimum_chrome_version": {
-              "type": "string",
-              "optional": true
+              "type": "string"
             },
             "applications": {
               "type": "object",
-              "optional": true,
               "properties": {
                 "gecko": {
-                  "$ref": "#/types/FirefoxSpecificProperties",
-                  "optional": true
+                  "$ref": "#/types/FirefoxSpecificProperties"
                 }
               }
             },
             "browser_specific_settings": {
               "type": "object",
-              "optional": true,
               "properties": {
                 "gecko": {
-                  "$ref": "#/types/FirefoxSpecificProperties",
-                  "optional": true
+                  "$ref": "#/types/FirefoxSpecificProperties"
                 }
               }
             },
             "name": {
               "type": "string",
-              "optional": false,
               "preprocess": "localize"
             },
             "short_name": {
               "type": "string",
-              "optional": true,
               "preprocess": "localize"
             },
             "description": {
               "type": "string",
-              "optional": true,
               "preprocess": "localize"
             },
             "author": {
               "type": "string",
-              "optional": true,
               "preprocess": "localize",
               "onError": "warn"
             },
             "version": {
-              "type": "string",
-              "optional": false
+              "type": "string"
             },
             "homepage_url": {
               "type": "string",
               "format": "url",
-              "optional": true,
               "preprocess": "localize"
             },
             "icons": {
               "type": "object",
-              "optional": true,
               "patternProperties": {
                 "^[1-9]\\d*$": {
                   "type": "string"
@@ -83,7 +71,6 @@
               "enum": [
                 "spanning"
               ],
-              "optional": true,
               "onError": "warn"
             },
             "background": {
@@ -95,13 +82,15 @@
                       "$ref": "#/types/ExtensionURL"
                     },
                     "persistent": {
-                      "optional": true,
                       "$ref": "#/types/PersistentBackgroundProperty"
                     }
                   },
                   "additionalProperties": {
                     "$ref": "#/types/UnrecognizedProperty"
-                  }
+                  },
+                  "required": [
+                    "page"
+                  ]
                 },
                 {
                   "type": "object",
@@ -113,59 +102,49 @@
                       }
                     },
                     "persistent": {
-                      "optional": true,
                       "$ref": "#/types/PersistentBackgroundProperty"
                     }
                   },
                   "additionalProperties": {
                     "$ref": "#/types/UnrecognizedProperty"
-                  }
+                  },
+                  "required": [
+                    "scripts"
+                  ]
                 }
-              ],
-              "optional": true
+              ]
             },
             "options_ui": {
               "type": "object",
-              "optional": true,
               "properties": {
                 "page": {
                   "$ref": "#/types/ExtensionURL"
                 },
                 "browser_style": {
-                  "type": "boolean",
-                  "optional": true
+                  "type": "boolean"
                 },
                 "chrome_style": {
-                  "type": "boolean",
-                  "optional": true
+                  "type": "boolean"
                 },
                 "open_in_tab": {
-                  "type": "boolean",
-                  "optional": true
+                  "type": "boolean"
                 }
               },
               "additionalProperties": {
-                "type": [
-                  "array",
-                  "boolean",
-                  "null",
-                  "number",
-                  "object",
-                  "string"
-                ],
                 "deprecated": "An unexpected property was found in the WebExtension manifest"
-              }
+              },
+              "required": [
+                "page"
+              ]
             },
             "content_scripts": {
               "type": "array",
-              "optional": true,
               "items": {
                 "$ref": "#/types/ContentScript"
               }
             },
             "content_security_policy": {
               "type": "string",
-              "optional": true,
               "format": "contentSecurityPolicy",
               "onError": "warn"
             },
@@ -181,28 +160,23 @@
                     "deprecated": "Unknown permission ${value}"
                   }
                 ]
-              },
-              "optional": true
+              }
             },
             "web_accessible_resources": {
               "type": "array",
               "items": {
                 "type": "string"
-              },
-              "optional": true
+              }
             },
             "developer": {
               "type": "object",
-              "optional": true,
               "properties": {
                 "name": {
                   "type": "string",
-                  "optional": true,
                   "preprocess": "localize"
                 },
                 "url": {
                   "type": "string",
-                  "optional": true,
                   "preprocess": "localize"
                 }
               }
@@ -210,7 +184,12 @@
           },
           "additionalProperties": {
             "$ref": "#/types/UnrecognizedProperty"
-          }
+          },
+          "required": [
+            "manifest_version",
+            "name",
+            "version"
+          ]
         },
         {
           "$ref": "i18n#/definitions/WebExtensionManifest"
@@ -257,21 +236,17 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/types/ExtensionID",
-          "optional": true
+          "$ref": "#/types/ExtensionID"
         },
         "update_url": {
           "type": "string",
-          "format": "url",
-          "optional": true
+          "format": "url"
         },
         "strict_min_version": {
-          "type": "string",
-          "optional": true
+          "type": "string"
         },
         "strict_max_version": {
-          "type": "string",
-          "optional": true
+          "type": "string"
         }
       }
     },
@@ -302,7 +277,6 @@
       "properties": {
         "matches": {
           "type": "array",
-          "optional": false,
           "minItems": 1,
           "items": {
             "$ref": "#/types/MatchPattern"
@@ -310,7 +284,6 @@
         },
         "exclude_matches": {
           "type": "array",
-          "optional": true,
           "minItems": 1,
           "items": {
             "$ref": "#/types/MatchPattern"
@@ -318,21 +291,18 @@
         },
         "include_globs": {
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }
         },
         "exclude_globs": {
           "type": "array",
-          "optional": true,
           "items": {
             "type": "string"
           }
         },
         "css": {
           "type": "array",
-          "optional": true,
           "description": "The list of CSS files to inject",
           "items": {
             "$ref": "#/types/ExtensionURL"
@@ -340,7 +310,6 @@
         },
         "js": {
           "type": "array",
-          "optional": true,
           "description": "The list of CSS files to inject",
           "items": {
             "$ref": "#/types/ExtensionURL"
@@ -348,20 +317,20 @@
         },
         "all_frames": {
           "type": "boolean",
-          "optional": true,
           "description": "If allFrames is <code>true</code>, implies that the JavaScript or CSS should be injected into all frames of current page. By default, it's <code>false</code> and is only injected into the top frame."
         },
         "match_about_blank": {
           "type": "boolean",
-          "optional": true,
           "description": "If matchAboutBlank is true, then the code is also injected in about:blank and about:srcdoc frames if your extension has access to its parent document. Code cannot be inserted in top-level about:-frames. By default it is <code>false</code>."
         },
         "run_at": {
           "$ref": "extensionTypes#/types/RunAt",
-          "optional": true,
           "description": "The soonest that the JavaScript or CSS will be injected into the tab. Defaults to \"document_idle\"."
         }
-      }
+      },
+      "required": [
+        "matches"
+      ]
     },
     "IconPath": {
       "anyOf": [
@@ -401,14 +370,6 @@
       "postprocess": "convertImageDataToURL"
     },
     "UnrecognizedProperty": {
-      "type": [
-        "array",
-        "boolean",
-        "null",
-        "number",
-        "object",
-        "string"
-      ],
       "deprecated": "An unexpected property was found in the WebExtension manifest."
     },
     "PersistentBackgroundProperty": {

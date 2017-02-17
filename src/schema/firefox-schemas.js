@@ -1,16 +1,15 @@
 import fs from 'fs';
 
 // TODO: Handle /* \n...\n*/ style comments in schemas.
-// TODO: Rewrite `optional`: false to `required`: [<fields>].
 
-const VALID_TYPES = [
-  'array',
-  'boolean',
-  'null',
-  'number',
-  'object',
-  'string',
-];
+// const VALID_TYPES = [
+//   'array',
+//   'boolean',
+//   'null',
+//   'number',
+//   'object',
+//   'string',
+// ];
 const VALID_SCHEMAS = [
   'downloads.json',
   'i18n.json',
@@ -75,11 +74,41 @@ function stripFlagsFromPattern(value) {
   return value;
 }
 
-function rewriteRef(key, value) {
+/*
+ * Convert the absence of `optional` or `optional: false` to an array of
+ * required properties at the same level of the properties (more processing
+ * is done in rewriteRef).
+ */
+export function rewriteOptionalToRequired(schema) {
+  const required = [];
+  const withoutOptional = Object.keys(schema).reduce((obj, key) => {
+    const value = schema[key];
+    if (!Array.isArray(value) && typeof value === 'object') {
+      const { optional, ...rest } = value;
+      if (!optional) {
+        required.push(key);
+      }
+      return { ...obj, [key]: rest };
+    }
+    return { ...obj, [key]: value };
+  }, {});
+  return { ...withoutOptional, required };
+}
+
+export function rewriteRef(key, value) {
   if (Array.isArray(value)) {
     return value.map((val) => rewriteRef(key, val));
   } else if (typeof value === 'object') {
-    return rewriteRefs(value);
+    const rewritten = rewriteRefs(value);
+    if ('properties' in rewritten) {
+      const { required, ...properties } = rewriteOptionalToRequired(
+        rewritten.properties);
+      if (required.length > 0) {
+        return { ...rewritten, properties, required };
+      }
+      return { ...rewritten, properties };
+    }
+    return rewritten;
   } else if (key === '$ref') {
     let path = value;
     let schemaId = '';
@@ -88,7 +117,7 @@ function rewriteRef(key, value) {
     }
     return `${schemaId}#/types/${path}`;
   } else if (key === 'type' && value === 'any') {
-    return VALID_TYPES;
+    return undefined;
   } else if (key === 'id') {
     return undefined;
   } else if (key === 'pattern') {
@@ -165,7 +194,7 @@ function writeSchemasToFile(path, loadedSchemas) {
   });
 }
 
-function importSchemas() {
+export function importSchemas() {
   const path = process.argv[2];
   const loadedSchemas = loadSchemasFromFile(path);
   // Map $extend to $ref.
@@ -187,5 +216,3 @@ function importSchemas() {
   });
   writeSchemasToFile(path, loadedSchemas);
 }
-
-importSchemas();

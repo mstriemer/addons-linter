@@ -240,9 +240,10 @@ export const KNOWN_LIBRARY = {
   ],
 };
 
-export const UNKNOWN_API = {
-  code: 'UNKNOWN_API',
-  message: _('{{api}} is not support by Firefox'),
+export const UNSUPPORTED_API = {
+  code: 'UNSUPPORTED_API',
+  message: null,
+  messageFormat: _('{{api}} is not supported'),
   description: _('This API has not been implemented by Firefox.'),
   legacyCode: null,
 };
